@@ -38,7 +38,11 @@ Shader "Custom/My First Shader"
                 //Define a struct of interpolators
                 Interpolators i;
 
+                //Simply passing on original uv coords to fragment shader
                 i.uv = v.uv;
+
+                //Storing the vertex's position in model space and passed onto fragment for fragment interpolation
+                // localPosition = position.xyz;
 
                 //Convert the vertex's position in model space to projection space
                 i.position = UnityObjectToClipPos(v.position); 
@@ -47,7 +51,15 @@ Shader "Custom/My First Shader"
 
             float4 MyFragmentProgram(Interpolators i) : SV_TARGET
             {
-                return float4(i.uv, 1, 1);
+
+                //To display the representation of localCoords
+                // return float4(localPosition, 1)
+
+                //To fix the colours being clamped to 0.5, as some channels end up becoming -1/2
+                //  return float4(localPosition + 0.5, 1)
+
+                //Sample the texture with the provided uv coordinates
+                return tex2D(_MainTex, i.uv);
             }
             ENDCG
         }
