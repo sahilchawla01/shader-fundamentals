@@ -23,21 +23,23 @@ Shader "Custom/My First Shader"
 
             struct Interpolators {
                 float4 position: SV_POSITION;
-                float3 localPosition:TEXCOORD0;
+                float3 localPosition: TEXCOORD0;
             };
 
-            float4 MyVertexProgram (float4 position: POSITION, out float3 localPosition: TEXCOORD0) : SV_POSITION
+            Interpolators MyVertexProgram (float4 position: POSITION)
             {
+                //Define a struct of interpolators
+                Interpolators i;
 
                 //Store and output the vertex's position in the model
-                localPosition = position.xyz;
-
-                return UnityObjectToClipPos(position);
+                i.localPosition = position.xyz;
+                i.position = UnityObjectToClipPos(position); 
+                return i;
             }
 
-            float4 MyFragmentProgram(float4 position : SV_POSITION, float3 localPosition : TEXCOORD0) : SV_TARGET
+            float4 MyFragmentProgram(Interpolators i) : SV_TARGET
             {
-                return float4(localPosition, 1);
+                return float4(i.localPosition, 1);
             }
             ENDCG
         }
