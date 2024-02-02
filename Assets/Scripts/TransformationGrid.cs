@@ -36,7 +36,7 @@ public Transform prefab;
     // Update is called once per frame
     void Update()
     {
-        GetComponents<Transformation>(transformations);
+        UpdateTransformation();
 		for (int i = 0, z = 0; z < gridResolution; z++) {
 			for (int y = 0; y < gridResolution; y++) {
 				for (int x = 0; x < gridResolution; x++, i++) {

@@ -4,7 +4,7 @@ public class PositionTransform : Transformation
 {
     public Vector3 position;
 
-    public override Matrix4x4 Matrix4x4
+    public override Matrix4x4 Matrix
     {
         get 
         { 

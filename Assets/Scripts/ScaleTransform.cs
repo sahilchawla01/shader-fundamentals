@@ -14,3 +14,4 @@ public class ScaleTransform : Transformation
 			return matrix;
 		}
 	}
+}
