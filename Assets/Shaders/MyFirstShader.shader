@@ -22,6 +22,8 @@ Shader "Custom/My First Shader"
 
             float4 _Tint;
             sampler2D _MainTex;
+            //Originally standed for scale and translation but currently it is Tiling and Offset
+            float4 _MainTex_ST;
 
             struct Interpolators {
                 float4 position: SV_POSITION;
@@ -39,7 +41,13 @@ Shader "Custom/My First Shader"
                 Interpolators i;
 
                 //Simply passing on original uv coords to fragment shader
-                i.uv = v.uv;
+                // i.uv = v.uv;
+
+                //Take mesh's uv coord and Tile it according to provided input
+                // i.uv = v.uv * _MainTex_ST.xy;
+
+                //Take mesh's uv coord and account for Tiling(Scaling) and Offset (Translation)
+                i.uv = v.uv * _MainTex_ST.xy + _MainTex_ST.zw;
 
                 //Storing the vertex's position in model space and passed onto fragment for fragment interpolation
                 // localPosition = position.xyz;
@@ -59,7 +67,10 @@ Shader "Custom/My First Shader"
                 //  return float4(localPosition + 0.5, 1)
 
                 //Sample the texture with the provided uv coordinates
-                return tex2D(_MainTex, i.uv);
+                // return tex2D(_MainTex, i.uv);
+
+                //Factor in tint when utilising texture
+                return tex2D(_MainTex, i.uv) * _Tint;
             }
             ENDCG
         }
