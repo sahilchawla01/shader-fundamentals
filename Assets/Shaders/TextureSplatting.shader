@@ -1,13 +1,15 @@
 // Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
-Shader "Custom/Texture with Detail" 
+Shader "Custom/Texture Splatting" 
 {
 
     Properties
     {
-        _Tint ("Tint", Color) = (1, 1, 1, 1)
-        _MainTex("Texture", 2D) = "white" 
-        _DetailTex("Detail Texture", 2D) = "gray"
+        _MainTex("Texture", 2D) = "White" 
+
+        //The [NoScaleOffset] attribute doesn't display Tiling and Offset in Material Inspector
+        [NoScaleOffset] _Texture1("Texture", 2D) = "white"
+        [NoScaleOffset] _Texture2("Texture", 2D) = "white"
     }
 
     SubShader
@@ -21,15 +23,16 @@ Shader "Custom/Texture with Detail"
 
             #include "UnityCG.cginc"
 
-            float4 _Tint;
-            sampler2D _MainTex, _DetailTex;
+            sampler2D _MainTex;
             //Originally standed for scale and translation but currently it is Tiling and Offset
-            float4 _MainTex_ST, _DetailTex_ST;
+            float4 _MainTex_ST;
+            
+            sampler2D _Texture1, _Texture2;
 
             struct Interpolators {
                 float4 position: SV_POSITION;
                 float2 uv: TEXCOORD0;
-                float2 uvDetail: TEXCOORD1;
+                float2 uvSplat: TEXCOORD1;
             };
 
             struct VertexData {
@@ -45,8 +48,8 @@ Shader "Custom/Texture with Detail"
                 //Take mesh's uv coord and account for Tiling(Scaling) and Offset (Translation)
                 i.uv = v.uv * _MainTex_ST.xy + _MainTex_ST.zw;
 
-                //Account for Tiling and Offset for DETAIL Texture
-                i.uvDetail = v.uv * _DetailTex_ST.xy + _DetailTex_ST.zw;
+                //Provide the non-scaled uv to fragment
+                i.uvSplat = v.uv;
 
                 //Convert the vertex's position in model space to projection space
                 i.position = UnityObjectToClipPos(v.position); 
@@ -55,15 +58,13 @@ Shader "Custom/Texture with Detail"
 
             float4 MyFragmentProgram(Interpolators i) : SV_TARGET
             {
-                //Factor in tint when utilising texture
-                float4 color =  tex2D(_MainTex, i.uv) * _Tint;
+                float splat = tex2D(_MainTex, i.uvSplat);
 
-                //Samples and adds detail along with brightening it
-                // color *= tex2D(_MainTex, i.uv * 10) * 2;
 
-                //Samples a detail texture along with  brightening it
-                color *= tex2D(_DetailTex, i.uvDetail) * unity_ColorSpaceDouble;
-                return color;
+                //Both textures are added
+                // return tex2D(_Texture1, i.uv) + tex2D(_Texture2, i.uv);
+
+                return tex2D(_Texture1, i.uv) * splat.r + tex2D(_Texture2, i.uv) * (1 - splat.r);
             }
             ENDCG
         }
